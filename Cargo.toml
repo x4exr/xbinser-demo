@@ -1,0 +1,10 @@
+[package]
+name = "xbinser-bench"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ocl = "0.19.7"
+tungstenite = "0.24.0"
+xbinser = "0.1.1"
+xbinser-macros = "0.1.1"
