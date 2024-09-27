@@ -12,9 +12,9 @@ void plot_point(__global unsigned char* buffer, uint width, uint height, uint x,
     buffer[index + 3] = 255; // A (Alpha)
 }
 
-__kernel void generate(__global unsigned char* buffer, float scalar) {
-    const uint width = 1080;
-    const uint height = 1920;
+__kernel void generate(__global unsigned char* buffer, unsigned char scalar) {
+    const uint width = 1000;
+    const uint height = 1080;
 
     uint gid = get_global_id(0);
     uint col = gid % width;
@@ -31,5 +31,5 @@ __kernel void generate(__global unsigned char* buffer, float scalar) {
     float pixel_x = (unsigned char) (sin((float) col / 40) * 255);
     float pixel_y = (unsigned char) (sin((float) line / 40) * 255);
 
-    plot_point(buffer, width, height, col, line, (unsigned char) col, 0, (unsigned char) line);
+    plot_point(buffer, width, height, col + scalar, line, (unsigned char) col, 0, (unsigned char) line);
 }

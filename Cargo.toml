@@ -6,5 +6,10 @@ edition = "2021"
 [dependencies]
 ocl = "0.19.7"
 tungstenite = "0.24.0"
-xbinser = "0.1.1"
+xbinser = "0.1.2"
 xbinser-macros = "0.1.1"
+
+[profile.flamegraph]
+opt-level = 0
+debug = "full"
+inherits = "dev"

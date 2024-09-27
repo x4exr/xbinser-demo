@@ -24,6 +24,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "bytemuck"
+version = "1.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94bbb0ad554ad961ddc5da507a12a29b14e4ae5bda06b19f575a3e6079d2e2ae"
+
+[[package]]
 name = "byteorder"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -464,9 +470,12 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "xbinser"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "516c34e1fe0100e7a40388dab88863102894623c295b0455ca76bbd4de581278"
+checksum = "21357864d3a18ae8e6fbbce790e113f0f77ddca0806417a0d597bd805c4e8827"
+dependencies = [
+ "bytemuck",
+]
 
 [[package]]
 name = "xbinser-bench"

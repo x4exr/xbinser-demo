@@ -1,7 +1,7 @@
 use std::io::{Cursor, Seek};
 use std::net::TcpListener;
 use std::thread::sleep;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use ocl::ProQue;
 use tungstenite::{accept, Message};
 use xbinser::encoding::Encoded;
@@ -12,39 +12,56 @@ use xbinser_macros::StructEncoded;
 struct FrameBuffer {
     frame: Vec<u8>
 }
+
 fn main() {
+    let kernel_builder_start = Instant::now();
     let src = include_str!("./shader.cpp");
 
     let pro_que = ProQue::builder()
         .src(src)
-        .dims(4 * 1920 * 1080)
+        .dims(4 * 1000 * 200)
         .build().expect("Kernel error");
 
     let buffer = pro_que.create_buffer::<u8>().expect("Buffer");
     let mut vec = vec![0u8; buffer.len()];
-
-    let kernel = pro_que.kernel_builder("generate")
-        .arg(&buffer)
-        .arg(10.0f32)
-        .build().expect("Build error");
+    
+    println!("Created kernel in {:?}", kernel_builder_start.elapsed());
 
     let server = TcpListener::bind("0.0.0.0:1084").unwrap();
     for stream in server.incoming() {
         let mut socket = accept(stream.unwrap()).expect("Failed to accept websocket");
         println!("Websocket connection accepted");
+        let mut buf = Cursor::new(vec![0u8]);
+        let mut scalar = 0u8;
 
         loop {
+            buf.set_position(0);
+            
+            let frame_start = Instant::now();
+
+            let kernel = pro_que.kernel_builder("generate")
+                .arg(&buffer)
+                .arg(scalar)
+                .build().expect("Build error");
+            
             unsafe { kernel.enq().expect("Failed to queue kernel"); }
             buffer.read(&mut vec).enq().expect("Read");
-            let mut buf = Cursor::new(vec![0u8]);
-            FrameBuffer { frame: vec.clone() }.encode(&mut buf).expect("Failed to assemble buffer");
+            println!("Rendered and copied frame from GPU in {:?}", frame_start.elapsed());
+            
+            let frame =  vec.clone();
+            let packet_start = Instant::now();
+            FrameBuffer { frame }.encode(&mut buf).expect("Failed to assemble buffer");
+            println!("Generated packet i {:?}", packet_start.elapsed());
 
-            if let Err(error) = socket.send(Message::Binary(buf.into_inner())) {
+            let send_start = Instant::now();
+            if let Err(error) = socket.send(Message::Binary(buf.clone().into_inner())) {
                 println!("Error: Failed to write frame output");
                 println!("{error}");
-
                 break;
             }
+            
+            scalar += 10;
+            println!("Sent frame in {:?}", send_start.elapsed());
 
             // sleep(Duration::from_millis(16));
         }

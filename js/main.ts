@@ -19,8 +19,8 @@ setInterval(() => {
     frame_count = 0;
 }, 1000);
 
-canvas.width = 1920;
-canvas.height = 1080;
+canvas.width = 1000;
+canvas.height = 200;
 
 let context = canvas.getContext("2d");
 let image_data = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -53,5 +53,8 @@ socket.onmessage = async (message) => {
 
     let buffer = new Uint8Array(await message.data.arrayBuffer());
     let decoded = decoder.decode(0n, buffer)[0] as FrameBuffer;
+
+    console.log(decoded.frame.length);
+
     load_image(decoded.frame as any as Uint8ClampedArray);
 }
